@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package log.v1;
+
+// Chapter 2: the domain types. The book's file has an
+// `option go_package = "github.com/travisjeffery/api/log_v1";` line —
+// Go-only, so Python leaves it out; `package log.v1` already maps to
+// the module path `pylog.api.v1`.
+//
+// Chapter 4 adds the Log service. Chapter 9 adds GetServers, which the
+// client-side resolver uses to discover servers and find the leader.
+service Log {
+  rpc Produce(ProduceRequest) returns (ProduceResponse) {}
+  rpc Consume(ConsumeRequest) returns (ConsumeResponse) {}
+  rpc ConsumeStream(ConsumeRequest) returns (stream ConsumeResponse) {}
+  rpc ProduceStream(stream ProduceRequest) returns (stream ProduceResponse) {}
+  rpc GetServers(GetServersRequest) returns (GetServersResponse) {}
+}
+
+message ProduceRequest {
+  Record record = 1;
+}
+
+message ProduceResponse {
+  uint64 offset = 1;
+}
+
+message ConsumeRequest {
+  uint64 offset = 1;
+}
+
+message ConsumeResponse {
+  Record record = 2;
+}
+
+message GetServersRequest {}
+
+message GetServersResponse {
+  repeated Server servers = 1;
+}
+
+message Server {
+  string id = 1;
+  string rpc_addr = 2;
+  bool is_leader = 3;
+}
+
+message Record {
+  bytes value = 1;
+  uint64 offset = 2;
+}

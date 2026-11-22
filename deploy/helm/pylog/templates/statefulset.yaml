@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-pylog
+spec:
+  serviceName: {{ .Release.Name }}-pylog
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: pylog
+  template:
+    metadata:
+      labels:
+        app: pylog
+    spec:
+      containers:
+        - name: pylog
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --node-id
+            - "$(POD_NAME)"
+            - --data-dir
+            - {{ .Values.dataDir }}
+            - --rpc-addr
+            - "0.0.0.0:{{ .Values.rpcPort }}"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - containerPort: {{ .Values.rpcPort }}
+              name: rpc
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.dataDir }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.storage }}

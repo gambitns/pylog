@@ -1,0 +1,49 @@
+# Chapter 10 — plain Kubernetes manifests (the Helm chart in
+# deploy/helm/pylog is the same deployment, parameterised).
+# Apply with: kubectl apply -f deploy/k8s/
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pylog
+spec:
+  serviceName: pylog
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pylog
+  template:
+    metadata:
+      labels:
+        app: pylog
+    spec:
+      containers:
+        - name: pylog
+          image: pylog:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8401
+              name: rpc
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pylog
+spec:
+  clusterIP: None # headless: each pod gets a stable DNS name, which
+  # is what Raft needs (see docs/days/day-30.md)
+  selector:
+    app: pylog
+  ports:
+    - port: 8401
+      name: rpc

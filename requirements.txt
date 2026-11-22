@@ -1,0 +1,11 @@
+protobuf>=5
+grpcio>=1.60
+grpcio-tools>=1.60
+prometheus-client>=0.19
+# Optional, for Chapter 6 traces / structured logs (guarded imports):
+# opentelemetry-api
+# opentelemetry-sdk
+# opentelemetry-exporter-otlp
+# structlog
+# Optional, for Chapter 5 Casbin ACLs (readable-function policy is the default):
+# casbin

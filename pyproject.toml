@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pylog"
+version = "0.1.0"
+description = "A distributed commit-log service in Python — the project from Travis Jeffery's Distributed Services with Go, translated for learning."
+requires-python = ">=3.11"
+dependencies = [
+    "protobuf>=5",
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "prometheus-client>=0.19",
+]
+
+[project.optional-dependencies]
+observability = [
+    "opentelemetry-api",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp",
+    "structlog",
+]
+auth = [
+    "casbin",
+]
+
+[tool.setuptools.packages.find]
+include = ["pylog*", "cmd*"]

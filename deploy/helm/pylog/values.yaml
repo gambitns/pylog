@@ -1,0 +1,9 @@
+# Chapter 10 — configuration as values, not code edits.
+replicaCount: 3
+image:
+  repository: pylog
+  tag: latest
+  pullPolicy: IfNotPresent
+rpcPort: 8401
+dataDir: /data
+storage: 1Gi
