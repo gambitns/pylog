@@ -40,7 +40,16 @@ class Store:
 
     def append(self, p: bytes) -> tuple[int, int]:
         """Return (bytes_written, position) — position is where the record
-        starts in the file; the segment uses it for the index entry."""
+        starts in the file; the segment uses it for the index entry.
+
+        No seek is needed here, deliberately: the file is opened
+        "a+b" (append mode, see Store.open), so writes always go to
+        the end of the file, and reads use os.pread, which does not
+        move a shared file offset. A read-then-append therefore
+        cannot overwrite a middle record — see
+        test_read_then_append in tests/test_durable_log.py.
+        (A plain "r+b" file with seek + read would need an explicit
+        seek to self._size at the start of append.)"""
         with self._mu:
             pos = self._size
             self._buf.write(_ENC.pack(len(p)))

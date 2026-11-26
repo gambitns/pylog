@@ -68,6 +68,24 @@ class TestDurableLog(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(self.dir, "0.store")))
         log.close()
 
+    def test_read_then_append(self):
+        # Regression test (Day 4, 2026-11-25): a read must not move
+        # the write position. Append two records, read the first,
+        # then append a third — the third must land after the second,
+        # not overwrite it. The simplified Day 4 Store (open "r+b",
+        # seek + read) failed this; the repo Store is safe because
+        # its file is opened "a+b" and reads use os.pread, which
+        # does not move a shared file offset.
+        log = Log(self.dir)
+        self.assertEqual(log.append(_rec(b"hello world")), 0)
+        self.assertEqual(log.append(_rec(b"second record")), 1)
+        self.assertEqual(log.read(0).value, b"hello world")
+        self.assertEqual(log.append(_rec(b"third record")), 2)
+        self.assertEqual(log.read(0).value, b"hello world")
+        self.assertEqual(log.read(1).value, b"second record")
+        self.assertEqual(log.read(2).value, b"third record")
+        log.close()
+
 
 if __name__ == "__main__":
     unittest.main()
